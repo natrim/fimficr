@@ -1,0 +1,22 @@
+{
+  "name": "FimFicR",
+  "longname": "FimFiction.net Reader",
+  "namespace": "cz.natrim.fimficr",
+  "version": "0.0.1",
+  "description": "FimFiction.net simple reader wrapper app",
+  "author": "Natrim",
+  "sources": {
+    "directory": "."
+  },
+  "icon": {
+    "windows": [
+      "assets/icon.png"
+    ],
+    "osx": [
+      "assets/icon.png"
+    ]
+  },
+  "main": "main.js",
+  "license": "MIT",
+  "copyright": "2016 Natrim"
+}
