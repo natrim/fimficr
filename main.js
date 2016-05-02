@@ -1,5 +1,9 @@
 require('Common');
 
+var window = new Window();
+application.exitAfterWindowsClose = true;
+window.visible = true;
+
 var appSettings = {
   homePage: 'https://www.fimfiction.net/',
   urlPrefix: 'https://www.fimfiction.net/'
@@ -9,24 +13,49 @@ var settings = JSON.parse(application.storage || '{}') || {};
 if (!settings.lastUrl) {
   settings.lastUrl = '';
 }
+if (!settings.window) {
+  settings.window = {};
+}
 
+function saveSettings() {
+  application.storage = JSON.stringify(settings);
+}
 
-var window = new Window();
-application.exitAfterWindowsClose = true;
-window.visible = true;
+window.x = settings.window.x || 0;
+window.y = settings.window.y || 0;
+
+window.addEventListener('move', function () {
+  settings.window.x = window.x;
+  settings.window.y = window.y;
+  saveSettings();
+});
+
+window.width = settings.window.width || 1280;
+window.height = settings.window.height || 800;
+
+window.minimumWidth = 375;
+window.minimumHeight = 627;
+
+window.addEventListener('resize', function () {
+  settings.window.width = window.width;
+  settings.window.height = window.height;
+  settings.window.x = window.x;
+  settings.window.y = window.y;
+  saveSettings();
+});
+
+window.canBeFullscreen = true;
+
 window.title = 'FimFiction.net Reader';
-
 window.titleVisible = false;
 window.animateOnSizeChange = true;
 window.animateOnPositionChange = true;
 
-window.state = 'maximized';
-
 var ismac = (require('os').platform().toLowerCase() === "darwin" || require('os').platform().toLowerCase() === "mac");
 
-var mainMenu = new Menu();
-
 if (ismac) {
+  var mainMenu = new Menu();
+
   var appleMenu = new MenuItem(application.name, '');
   mainMenu.appendChild(appleMenu);
 
@@ -46,52 +75,10 @@ if (ismac) {
       process.exit(0);
     });
   appleMenu.submenu = appleSubmenu;
+
+  window.menu = mainMenu;
 }
 
-if (!ismac) {
-  var fileMenu = new MenuItem('File', '');
-  mainMenu.appendChild(fileMenu);
-  var fileSubmenu = new Menu('File');
-  fileSubmenu.appendChild(new MenuItem('Close', 'w', 'cmd'))
-    .addEventListener('click', function () {
-      process.exit(0);
-    });
-  fileMenu.submenu = fileSubmenu;
-}
-
-var editMenu = new MenuItem('Edit', '');
-mainMenu.appendChild(editMenu);
-
-var editSubmenu = new Menu('Edit');
-var undo = new MenuItem('Undo', 'u');
-undo.addEventListener('click', function () { application.undo(); });
-editSubmenu.appendChild(undo);
-editSubmenu.appendChild(new MenuItem('Redo', 'r'))
-  .addEventListener('click', function () { application.redo(); });
-editSubmenu.appendChild(new MenuItemSeparator());
-editSubmenu.appendChild(new MenuItem('Copy', 'c'))
-  .addEventListener('click', function () { application.copy(); });
-editSubmenu.appendChild(new MenuItem('Cut', 'x'))
-  .addEventListener('click', function () { application.cut(); });
-editSubmenu.appendChild(new MenuItem('Paste', 'p'))
-  .addEventListener('click', function () { application.paste(); });
-editMenu.submenu = editSubmenu;
-
-
-var windowMenu = new MenuItem('Window', '');
-mainMenu.appendChild(windowMenu);
-var windowSubmenu = new Menu('Window');
-windowSubmenu.appendChild(new MenuItem('Minimize', 'm'))
-  .addEventListener('click', function () { window.state = "minimized"; });
-windowSubmenu.appendChild(new MenuItem('Zoom', ''))
-  .addEventListener('click', function () { window.state = "maximized"; });
-windowSubmenu.appendChild(new MenuItemSeparator());
-windowSubmenu.appendChild(new MenuItem('Bring All to Front', ''))
-  .addEventListener('click', function () { window.bringToFront(); });
-windowSubmenu.appendChild(new MenuItemSeparator());
-windowMenu.submenu = windowSubmenu;
-
-window.menu = mainMenu;
 
 var webview = new WebView();
 window.appendChild(webview);
@@ -136,7 +123,7 @@ webview.addEventListener('location-change', function (oldl, newl) {
 webview.addEventListener('loading', function () {
   if (webview.location !== settings.lastUrl) {
     settings.lastUrl = webview.location;
-    application.storage = JSON.stringify(settings);
+    saveSettings();
   }
 });
 
