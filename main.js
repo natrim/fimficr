@@ -1,5 +1,16 @@
 require('Common');
 
+var appSettings = {
+  homePage: 'https://www.fimfiction.net/',
+  urlPrefix: 'https://www.fimfiction.net/'
+};
+
+var settings = JSON.parse(application.storage || '{}') || {};
+if (!settings.lastUrl) {
+  settings.lastUrl = '';
+}
+
+
 var window = new Window();
 application.exitAfterWindowsClose = true;
 window.visible = true;
@@ -43,9 +54,7 @@ if (!ismac) {
   var fileSubmenu = new Menu('File');
   fileSubmenu.appendChild(new MenuItem('Close', 'w', 'cmd'))
     .addEventListener('click', function () {
-      if (!ismac) {
-        process.exit(0);
-      }
+      process.exit(0);
     });
   fileMenu.submenu = fileSubmenu;
 }
@@ -110,11 +119,13 @@ window.toolbar = toolbar;
 backButton.addEventListener('click', function () { webview.back(); });
 forwardButton.addEventListener('click', function () { webview.forward(); });
 reloadButton.addEventListener('click', function () { webview.reload(); });
-homeButton.addEventListener('click', function () { webview.location = 'https://www.fimfiction.net/'; });
+homeButton.addEventListener('click', function () { webview.location = appSettings.homePage; });
 
 urlLocation.addEventListener('inputend', function () {
   var url = urlLocation.value;
-  if (url.indexOf('fimfiction.net') === -1) url = 'https://www.fimfiction.net/' + url;
+  if (url.indexOf(appSettings.urlPrefix) === -1) {
+    url = appSettings.urlPrefix + url;
+  }
   webview.location = url;
 });
 
@@ -122,9 +133,20 @@ webview.addEventListener('location-change', function (oldl, newl) {
   urlLocation.value = newl;
 });
 
+webview.addEventListener('loading', function () {
+  if (webview.location !== settings.lastUrl) {
+    settings.lastUrl = webview.location;
+    application.storage = JSON.stringify(settings);
+  }
+});
+
 urlLocation.alignment = 'center';
 urlLocation.linewrap = false;
 urlLocation.scrollable = true;
 
 webview.left = webview.right = webview.top = webview.bottom = 0;
-webview.location = 'https://www.fimfiction.net/';
+if (settings.lastUrl) {
+  webview.location = settings.lastUrl;
+} else {
+  webview.location = appSettings.homePage;
+}
