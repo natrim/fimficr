@@ -6,17 +6,25 @@
   "description": "FimFiction.net simple reader wrapper app",
   "author": "Natrim",
   "sources": {
-    "directory": "."
+    "directory": ".",
+    "exclude": ".git|.editorconfig|icon.png|build"
   },
   "icon": {
     "windows": [
-      "assets/icon.png"
+      "icon.png"
     ],
     "osx": [
-      "assets/icon.png"
+      "icon.png"
     ]
   },
   "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/natrim/fimficr.git"
+  },
+  "bugs": {
+    "url": "https://github.com/natrim/fimficr/issues"
+  },
   "license": "MIT",
   "copyright": "2016 Natrim"
 }
